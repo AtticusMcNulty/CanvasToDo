@@ -48,7 +48,7 @@ function Data() {
     return validKey;
   });
 
-  // refresh noti
+  const [showCourseName, setShowCourseName] = React.useState(true);
 
   React.useEffect(() => {
     if (validKey)
@@ -331,10 +331,10 @@ function Data() {
 
     // find the last space within the maxLength
     const lastSpaceIndex = str.lastIndexOf(" ", maxLength);
-    if (lastSpaceIndex === -1) return str.substring(0, maxLength) + "...";
+    if (lastSpaceIndex === -1) return str.substring(0, maxLength);
 
     // truncate at the last space found
-    return str.substring(0, lastSpaceIndex) + "...";
+    return str.substring(0, lastSpaceIndex);
   }
 
   const addableCourses = removedCourses.map((course, index) => {
@@ -376,7 +376,11 @@ function Data() {
       return !removedCourseNames.includes(course.name) ? (
         <div key={index}>
           <div className="course">
-            <div className="course-name">{courseName}</div>
+            {showCourseName ? (
+              <div className="course-name">{courseName}</div>
+            ) : (
+              <div></div>
+            )}
             <div className="course-crn">{courseCRN}</div>
             <div
               className="course-delete"
@@ -491,7 +495,7 @@ function Data() {
                               const [dueDate, daysUntil] = formattedDate
                                 ? getNumDays(formattedDate)
                                 : [null, null];
-                              const itemTitle = item.title.substring(0, 50);
+                              const itemTitle = truncateString(item.title, 30);
                               const submissionValid =
                                 assignObj &&
                                 submissions[courseIndex] &&
@@ -501,11 +505,22 @@ function Data() {
 
                               return (
                                 <div key={itemIndex} className="module-item">
-                                  <div>
-                                    {item.type} - {itemTitle}
+                                  {/*<div style={{ width: "90px" }}>
+                                    {item.type}
+                                  </div>*/}
+                                  <div style={{ width: "220px" }}>
+                                    {itemTitle}
                                   </div>
-                                  <div className="module-item-attributes">
-                                    <div>
+                                  <div
+                                    className="module-item-attributes"
+                                    style={{ width: "75px" }}
+                                  >
+                                    <div
+                                      style={{
+                                        width: "55px",
+                                        textAlign: "start",
+                                      }}
+                                    >
                                       {submissionValid &&
                                       submissions[courseIndex][assignObj.index]
                                         .grade
@@ -515,7 +530,7 @@ function Data() {
                                                 assignObj.index
                                               ].grade
                                             ).toFixed(2)
-                                          )} / ${
+                                          )}/${
                                             assignObj.assignment.points_possible
                                           }`
                                         : ""}
@@ -586,13 +601,9 @@ function Data() {
           ? getNumDays(formattedDate)
           : [null, null];
 
-        const name =
-          assignment && assignment.name.length > 50
-            ? truncateString(
-                assignment.name,
-                Math.round(window.screen.width / 25)
-              )
-            : assignment.name;
+        const name = assignment
+          ? truncateString(assignment.name, 20)
+          : assignment.name;
 
         const removedCourseNames = removedCourses.map((item) => item[0]);
 
@@ -926,7 +937,7 @@ function Data() {
           </div>
           <div className="user">
             <div className="user-info">
-              <div>User: {user.name}</div>
+              <div>{user.name}</div>
               <div>ID: {user.id}</div>
             </div>
             <div className="dropdown-container">
@@ -962,15 +973,58 @@ function Data() {
             <div className="section-title" style={{ margin: "0px" }}>
               Courses
             </div>
-            <button
-              className="button"
-              onClick={() => {
-                document.getElementById("courseModal").style.display = "block";
-                document.body.style.overflow = "hidden";
-              }}
-            >
-              Re-add Course
-            </button>
+            <div className="course-inputs">
+              <button
+                className="button"
+                onClick={() => {
+                  document.getElementById("courseModal").style.display =
+                    "block";
+                  document.body.style.overflow = "hidden";
+                }}
+              >
+                Re-add Course
+              </button>
+              <div className="course-inputs-checkbox">
+                <input
+                  type="checkbox"
+                  checked={showCourseName}
+                  onChange={() => {
+                    setShowCourseName((prevShowCourseName) => {
+                      if (prevShowCourseName) {
+                        Array.from(
+                          document.getElementsByClassName("course-crn")
+                        ).forEach((courseCRN) => {
+                          courseCRN.style.flex = "0.6";
+                          courseCRN.style.textAlign = "start";
+                        });
+
+                        Array.from(
+                          document.getElementsByClassName("course")
+                        ).forEach((courseCRN) => {
+                          courseCRN.style.justifyContent = "space-evenly";
+                        });
+                      } else {
+                        Array.from(
+                          document.getElementsByClassName("course-crn")
+                        ).forEach((courseCRN) => {
+                          courseCRN.style.flex = "0.4";
+                          courseCRN.style.textAlign = "center";
+                        });
+
+                        Array.from(
+                          document.getElementsByClassName("course")
+                        ).forEach((courseCRN) => {
+                          courseCRN.style.justifyContent = "space-between";
+                        });
+                      }
+
+                      return !prevShowCourseName;
+                    });
+                  }}
+                ></input>
+                <div>Full Name</div>
+              </div>
+            </div>
             <div className="course-container">{courseTitles}</div>
           </div>
           <div className="section">
@@ -981,66 +1035,68 @@ function Data() {
                 placeholder="Enter task"
                 autoComplete="off"
               ></input>
-              <input
-                id="toDo-add-inputDate"
-                type="date"
-                value={selectedDate}
-                onChange={(event) => {
-                  setSelectedDate(event.target.value);
-                }}
-              ></input>
-              <button
-                className="toDo-add-btn"
-                onClick={() => {
-                  setAddedToDo((prevArr) => {
-                    const arr = [...prevArr];
-                    const content =
-                      document.getElementById("toDo-add-inputTask").value;
-                    const object = { name: content, due_at: selectedDate };
-                    arr.push([
-                      arr.length,
-                      object,
-                      "userAdded",
-                      "userAdded",
-                      0,
-                      2,
-                      0,
-                      { grade: "userAdded", workflow_state: "userAdded" },
-                    ]);
+              <div className="toDo-add-container">
+                <input
+                  id="toDo-add-inputDate"
+                  type="date"
+                  value={selectedDate}
+                  onChange={(event) => {
+                    setSelectedDate(event.target.value);
+                  }}
+                ></input>
+                <select
+                  className="toDo-select"
+                  value={toDoExtent}
+                  onChange={(event) => {
+                    setToDoExtent(event.target.value);
+                    localStorage.setItem("toDoExtent", event.target.value);
+                  }}
+                >
+                  <option value="7">1 Week</option>
+                  <option value="14">2 Weeks</option>
+                  <option value="30">1 Month</option>
+                  <option value="1000">Show All</option>
+                </select>
+                <button
+                  className="toDo-add-btn"
+                  onClick={() => {
+                    setAddedToDo((prevArr) => {
+                      const arr = [...prevArr];
+                      const content =
+                        document.getElementById("toDo-add-inputTask").value;
+                      const object = { name: content, due_at: selectedDate };
+                      arr.push([
+                        arr.length,
+                        object,
+                        "userAdded",
+                        "userAdded",
+                        0,
+                        2,
+                        0,
+                        { grade: "userAdded", workflow_state: "userAdded" },
+                      ]);
 
-                    // Update local storage
-                    localStorage.setItem("addedToDo", JSON.stringify(arr));
+                      // Update local storage
+                      localStorage.setItem("addedToDo", JSON.stringify(arr));
 
-                    // Sort the new array
-                    const sortedArr = unsortedToDo.concat(arr);
-                    sortedArr.sort((a, b) => {
-                      const dateA = new Date(a[1].due_at).getTime();
-                      const dateB = new Date(b[1].due_at).getTime();
-                      return dateA - dateB;
+                      // Sort the new array
+                      const sortedArr = unsortedToDo.concat(arr);
+                      sortedArr.sort((a, b) => {
+                        const dateA = new Date(a[1].due_at).getTime();
+                        const dateB = new Date(b[1].due_at).getTime();
+                        return dateA - dateB;
+                      });
+
+                      // Update sorted array state
+                      setSortedToDo(sortedArr);
+
+                      return arr;
                     });
-
-                    // Update sorted array state
-                    setSortedToDo(sortedArr);
-
-                    return arr;
-                  });
-                }}
-              >
-                +
-              </button>
-              <select
-                className="toDo-select"
-                value={toDoExtent}
-                onChange={(event) => {
-                  setToDoExtent(event.target.value);
-                  localStorage.setItem("toDoExtent", event.target.value);
-                }}
-              >
-                <option value="7">1 Week</option>
-                <option value="14">2 Weeks</option>
-                <option value="30">1 Month</option>
-                <option value="1000">Show All</option>
-              </select>
+                  }}
+                >
+                  +
+                </button>
+              </div>
             </div>
             {sortedToDo.length > 0 ? (
               <div className="toDo-header">Current</div>

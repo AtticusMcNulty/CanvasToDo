@@ -1,13 +1,15 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap");
-
+@import url("https://fonts.googleapis.com/css2?family=Inter:slnt,wght@-10..0,100..900&display=swap");
 body {
-  font-family: "Poppins", sans-serif;
+  font-family: "Inter", sans-serif;
   background-color: #f4f4f4;
-  color: #333;
+  color: #222;
   margin: 0;
   padding: 0;
-  min-width: 600px;
+  min-width: 300px;
   min-height: 600px;
+
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .container {
@@ -28,7 +30,7 @@ body {
 
 .section-title {
   text-align: center;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   margin-bottom: 20px;
 }
@@ -38,13 +40,15 @@ body {
 }
 
 .button {
-  font-family: "poppins";
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
   background-color: white;
 
   border: 0px solid black;
   border-radius: 3px;
   box-shadow: 0 0px 3px rgba(0, 0, 0, 0.3);
   padding: 5px 15px;
+  margin: 5px 0px;
 
   cursor: pointer;
 }
@@ -94,7 +98,7 @@ body {
 .close {
   color: #aaa;
   font-weight: bold;
-  font-size: 28px;
+  font-size: 24px;
   margin-top: -10px;
 }
 
@@ -128,7 +132,7 @@ body {
   font-weight: bold;
   font-size: 24px;
   margin-bottom: 20px;
-  color: #333;
+  color: #222;
   width: 300px;
   text-align: center;
 }
@@ -273,7 +277,7 @@ body {
 }
 
 .courseModal-item-btn {
-  font-family: "poppins";
+  font-family: "Inter", sans-serif;
   background-color: white;
 
   border: 0px solid black;
@@ -301,8 +305,24 @@ body {
   width: 100%;
 }
 
+.course-inputs {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.course-inputs-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.course-inputs-checkbox > input {
+  width: 16px;
+  height: 16px;
+}
+
 .course-name,
-.course-crn,
 .course-delete {
   text-transform: capitalize;
   text-align: center;
@@ -313,11 +333,12 @@ body {
 }
 
 .course-crn {
+  text-align: center;
   flex: 0.4;
 }
 
 .course-delete {
-  font-family: "poppins";
+  font-family: "Inter", sans-serif;
   background-color: white;
 
   border: 0px solid black;
@@ -344,7 +365,7 @@ body {
 .course-title,
 .course-grade {
   font-weight: 500;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .course-title {
@@ -392,7 +413,7 @@ body {
 
 .module-item-attributes {
   display: flex;
-  gap: 10px;
+  gap: 5px;
 }
 
 .due {
@@ -426,9 +447,16 @@ body {
   margin: 5px 0px 20px 0px;
 }
 
+.toDo-add-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 #toDo-add-inputTask {
   display: block;
-  font-family: "poppins";
+  font-family: "Inter", sans-serif;
 
   outline: none;
   border: 1px solid black;
@@ -440,7 +468,7 @@ body {
 
 #toDo-add-inputDate {
   display: block;
-  font-family: "poppins";
+  font-family: "Inter", sans-serif;
 
   outline: none;
   border: 1px solid black;
@@ -449,36 +477,50 @@ body {
 }
 
 .toDo-add-btn {
-  font-family: "poppins";
+  font-family: "Inter", sans-serif;
 
   background-color: white;
 
   border: 0px solid black;
   border-radius: 3px;
   box-shadow: 0 0px 3px rgba(0, 0, 0, 0.3);
+  padding: 0px;
 
-  width: 27px;
-  height: 27px;
+  height: 25px;
+  aspect-ratio: 1/1;
 
   cursor: pointer;
 }
 
 .toDo-select {
   display: block;
-  font-family: "poppins";
+  font-family: "Inter", sans-serif;
 
   outline: none;
   border: 1px solid black;
   border-radius: 3px;
   padding: 3px 8px;
 
-  width: 175px;
+  width: 125px;
+}
+
+@media (max-width: 500px) {
+  .toDo-add {
+    flex-direction: column;
+    align-items: start;
+  }
+
+  .toDo-add-container {
+    display: flex;
+    align-items: center;
+  }
 }
 
 .toDo-item {
   display: flex;
 
   justify-content: space-between;
+  font-size: 14px;
 }
 
 .toDo-item-title {
@@ -494,6 +536,7 @@ body {
 
 .toDo-item-slider {
   position: relative;
+  line-height: 0.3;
 }
 
 .toDo-item-slider-input {
@@ -504,7 +547,7 @@ body {
   width: 100%;
   height: 1.5px;
   border-radius: 5px;
-  margin-bottom: 15px;
+  margin-bottom: 9px;
 
   cursor: pointer;
 
@@ -513,7 +556,7 @@ body {
 
 .toDo-item-slider-input::-webkit-slider-thumb {
   appearance: none;
-  height: 15px;
+  height: 12px;
   width: 0px;
 }
 
@@ -522,7 +565,6 @@ body {
   position: absolute;
   top: 2px;
 
-  font-size: 12px;
   text-align: center;
   color: white;
   background-color: #4caf50;
@@ -553,8 +595,8 @@ body {
   -o-appearance: none;
   appearance: none;
 
-  height: 20px;
-  width: 20px;
+  height: 16px;
+  width: 16px;
 
   border: 1.5px solid #ccc;
   border-radius: 2px;
