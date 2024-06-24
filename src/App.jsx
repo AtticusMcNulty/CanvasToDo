@@ -84,8 +84,6 @@ function Data() {
             }
           });
 
-          console.log(coursesData);
-
           setCourses(coursesData);
           setCourseVisibility(courses);
 
