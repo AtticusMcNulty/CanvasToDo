@@ -9,7 +9,7 @@ function createMainWindow() {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 400,
-    height: 600,
+    height: 550,
     show: false,
     frame: false,
     fullscreenable: false,

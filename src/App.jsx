@@ -51,157 +51,159 @@ function Data() {
   const [showCourseName, setShowCourseName] = React.useState(true);
 
   React.useEffect(() => {
-    try {
-      // get user information (name, id, etc.)
-      fetch(`http://54.153.125.141/api/users/self/${key}`)
-        .then((response) => response.json())
-        .then((userData) => {
-          setUser(userData);
+    if (validKey)
+      try {
+        // get user information (name, id, etc.)
+        fetch(`http://54.153.125.141/api/users/self/${key}`)
+          .then((response) => response.json())
+          .then((userData) => {
+            setUser(userData);
 
-          // get total course grades
-          fetch(
-            `http://54.153.125.141/api/users/${userData.id}/enrollments/${key}`
-          )
-            .then((response) => response.json())
-            .then((enrollmentData) => {
-              setEnrollment(enrollmentData);
-            });
-        });
-
-      // get user courses
-      fetch(`http://54.153.125.141/api/courses/${key}`)
-        .then((response) => response.json())
-        .then((coursesData) => {
-          // filter out invalid courses
-          let courses = [];
-          coursesData = coursesData.filter((course) => {
-            const courseCRN =
-              course.name.split("(").splice(-1, 1)[0].split("_")[0] +
-              course.name.split("(").splice(-1, 1)[0].split("_")[1];
-            if (!courseCRN.includes("undefined")) {
-              courses.push(false);
-              return course;
-            }
+            // get total course grades
+            fetch(
+              `http://54.153.125.141/api/users/${userData.id}/enrollments/${key}`
+            )
+              .then((response) => response.json())
+              .then((enrollmentData) => {
+                setEnrollment(enrollmentData);
+              });
           });
 
-          setCourses(coursesData);
-          setCourseVisibility(courses);
+        // get user courses
+        fetch(`http://54.153.125.141/api/courses/${key}`)
+          .then((response) => response.json())
+          .then((coursesData) => {
+            // filter out invalid courses
+            let courses = [];
 
-          let modulesPromise = [];
-          let assignmentsPromise = [];
+            coursesData = coursesData.filter((course) => {
+              const courseCRN =
+                course.name.split("(").splice(-1, 1)[0].split("_")[0] +
+                course.name.split("(").splice(-1, 1)[0].split("_")[1];
+              if (!courseCRN.includes("undefined")) {
+                courses.push(false);
+                return course;
+              }
+            });
 
-          for (const course of coursesData) {
-            modulesPromise.push(
-              fetch(
-                `http://54.153.125.141/api/courses/${course.id}/modules/${key}`
-              ).then((response) => response.json())
-            );
+            setCourses(coursesData);
+            setCourseVisibility(courses);
 
-            assignmentsPromise.push(
-              fetch(
-                `http://54.153.125.141/api/courses/${course.id}/assignments/${key}`
-              ).then((response) => response.json())
-            );
-          }
+            let modulesPromise = [];
+            let assignmentsPromise = [];
 
-          Promise.all(modulesPromise)
-            .then((modulesData) => {
-              setCourseModules(modulesData);
+            for (const course of coursesData) {
+              modulesPromise.push(
+                fetch(
+                  `http://54.153.125.141/api/courses/${course.id}/modules/${key}`
+                ).then((response) => response.json())
+              );
 
-              let visibility = [];
-              let moduleItemsPromise = [];
-              // iterate over modules data to fetch items for each module
-              // for each array of modules
-              modulesData.forEach((modules, courseIndex) => {
-                // if that array is indeed an array
-                if (Array.isArray(modules)) {
-                  let moduleVisibility = [];
+              assignmentsPromise.push(
+                fetch(
+                  `http://54.153.125.141/api/courses/${course.id}/assignments/${key}`
+                ).then((response) => response.json())
+              );
+            }
 
-                  // for each module, get its items
-                  let itemsPromises = modules.map((module) => {
-                    const regex = /courses\/(\d+)\/modules\/(\d+)\/items/;
-                    const [call, courseId, moduleId] =
-                      module.items_url.match(regex);
-                    return fetch(
-                      `http://54.153.125.141/api/courses/${courseId}/modules/${moduleId}/items/${key}`
-                    ).then((response) => response.json());
-                  });
+            Promise.all(modulesPromise)
+              .then((modulesData) => {
+                setCourseModules(modulesData);
 
-                  for (let i = 0; i < itemsPromises.length; i++) {
-                    moduleVisibility.push(false);
+                let visibility = [];
+                let moduleItemsPromise = [];
+                // iterate over modules data to fetch items for each module
+                // for each array of modules
+                modulesData.forEach((modules, courseIndex) => {
+                  // if that array is indeed an array
+                  if (Array.isArray(modules)) {
+                    let moduleVisibility = [];
+
+                    // for each module, get its items
+                    let itemsPromises = modules.map((module) => {
+                      const regex = /courses\/(\d+)\/modules\/(\d+)\/items/;
+                      const [call, courseId, moduleId] =
+                        module.items_url.match(regex);
+                      return fetch(
+                        `http://54.153.125.141/api/courses/${courseId}/modules/${moduleId}/items/${key}`
+                      ).then((response) => response.json());
+                    });
+
+                    for (let i = 0; i < itemsPromises.length; i++) {
+                      moduleVisibility.push(false);
+                    }
+
+                    visibility.push(moduleVisibility);
+                    moduleItemsPromise.push(Promise.all(itemsPromises));
+                  } else {
+                    visibility.push(false);
+                    moduleItemsPromise.push(false);
                   }
-
-                  visibility.push(moduleVisibility);
-                  moduleItemsPromise.push(Promise.all(itemsPromises));
-                } else {
-                  visibility.push(false);
-                  moduleItemsPromise.push(false);
-                }
-              });
-
-              // after all items are fetched, update the state with the collected data
-              Promise.all(moduleItemsPromise)
-                .then((moduleItems) => {
-                  setItems(moduleItems);
-                  setItemVisibility(visibility);
-                })
-                .catch((error) => {
-                  console.log("Error fetching module items:", error);
                 });
-            })
-            .catch((error) => {
-              console.log("Error fetching course modules:", error);
-            });
 
-          Promise.all(assignmentsPromise)
-            .then((assignmentsData) => {
-              setAssignments(assignmentsData);
-
-              // if unsortedToDo is already defined, do not wait for loaded submissions to call function
-              // if (unsortedToDo.length > 0)
-              // populateSortedToDo(assignmentsData, []);
-
-              let submissionsPromise = [];
-
-              // for each assignment
-              assignmentsData.forEach((course) => {
-                if (Array.isArray(course)) {
-                  let submissions = [];
-
-                  course.forEach((assignment) => {
-                    const regex = /courses\/(\d+)\/assignments\/(\d+)/;
-                    const [call, courseId, assignmentId] =
-                      assignment.html_url.match(regex);
-
-                    submissions.push(
-                      fetch(
-                        `http://54.153.125.141/api/courses/${courseId}/assignments/${assignmentId}/submissions/self/${key}`
-                      ).then((response) => response.json())
-                    );
+                // after all items are fetched, update the state with the collected data
+                Promise.all(moduleItemsPromise)
+                  .then((moduleItems) => {
+                    setItems(moduleItems);
+                    setItemVisibility(visibility);
+                  })
+                  .catch((error) => {
+                    console.log("Error fetching module items:", error);
                   });
-
-                  submissionsPromise.push(Promise.all(submissions));
-                } else {
-                  submissionsPromise.push(false);
-                }
+              })
+              .catch((error) => {
+                console.log("Error fetching course modules:", error);
               });
 
-              Promise.all(submissionsPromise)
-                .then((submissionsData) => {
-                  setSubmissions(submissionsData);
-                  populateSortedToDo(assignmentsData, submissionsData);
-                })
-                .catch((error) => {
-                  console.log("Error fetching submissions:", error);
+            Promise.all(assignmentsPromise)
+              .then((assignmentsData) => {
+                setAssignments(assignmentsData);
+
+                // if unsortedToDo is already defined, do not wait for loaded submissions to call function
+                // if (unsortedToDo.length > 0)
+                // populateSortedToDo(assignmentsData, []);
+
+                let submissionsPromise = [];
+
+                // for each assignment
+                assignmentsData.forEach((course) => {
+                  if (Array.isArray(course)) {
+                    let submissions = [];
+
+                    course.forEach((assignment) => {
+                      const regex = /courses\/(\d+)\/assignments\/(\d+)/;
+                      const [call, courseId, assignmentId] =
+                        assignment.html_url.match(regex);
+
+                      submissions.push(
+                        fetch(
+                          `http://54.153.125.141/api/courses/${courseId}/assignments/${assignmentId}/submissions/self/${key}`
+                        ).then((response) => response.json())
+                      );
+                    });
+
+                    submissionsPromise.push(Promise.all(submissions));
+                  } else {
+                    submissionsPromise.push(false);
+                  }
                 });
-            })
-            .catch((error) => {
-              console.log("Error fetching assignments:", error);
-            });
-        });
-    } catch (error) {
-      console.log(error);
-    }
+
+                Promise.all(submissionsPromise)
+                  .then((submissionsData) => {
+                    setSubmissions(submissionsData);
+                    populateSortedToDo(assignmentsData, submissionsData);
+                  })
+                  .catch((error) => {
+                    console.log("Error fetching submissions:", error);
+                  });
+              })
+              .catch((error) => {
+                console.log("Error fetching assignments:", error);
+              });
+          });
+      } catch (error) {
+        console.log(error);
+      }
   }, [validKey]);
 
   function getCourseGrade(courseId) {
