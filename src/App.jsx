@@ -51,158 +51,159 @@ function Data() {
   const [showCourseName, setShowCourseName] = React.useState(true);
 
   React.useEffect(() => {
-    if (validKey)
-      try {
-        // get user information (name, id, etc.)
-        fetch(`http://54.153.125.141/api/users/self/${key}`)
-          .then((response) => response.json())
-          .then((userData) => {
-            setUser(userData);
+    try {
+      // get user information (name, id, etc.)
+      fetch(`http://54.153.125.141/api/users/self/${key}`)
+        .then((response) => response.json())
+        .then((userData) => {
+          setUser(userData);
 
-            // get total course grades
-            fetch(
-              `http://54.153.125.141/api/users/${userData.id}/enrollments/${key}`
-            )
-              .then((response) => response.json())
-              .then((enrollmentData) => {
-                setEnrollment(enrollmentData);
-              });
+          // get total course grades
+          fetch(
+            `http://54.153.125.141/api/users/${userData.id}/enrollments/${key}`
+          )
+            .then((response) => response.json())
+            .then((enrollmentData) => {
+              setEnrollment(enrollmentData);
+            });
+        });
+
+      // get user courses
+      fetch(`http://54.153.125.141/api/courses/${key}`)
+        .then((response) => response.json())
+        .then((coursesData) => {
+          // filter out invalid courses
+          let courses = [];
+          coursesData = coursesData.filter((course) => {
+            const courseCRN =
+              course.name.split("(").splice(-1, 1)[0].split("_")[0] +
+              course.name.split("(").splice(-1, 1)[0].split("_")[1];
+            if (!courseCRN.includes("undefined")) {
+              courses.push(false);
+              return course;
+            }
           });
 
-        // get user courses
-        fetch(`http://54.153.125.141/api/courses/${key}`)
-          .then((response) => response.json())
-          .then((coursesData) => {
-            // filter out invalid courses
-            let courses = [];
-            coursesData = coursesData.filter((course) => {
-              const courseCRN =
-                course.name.split("(").splice(-1, 1)[0].split("_")[0] +
-                course.name.split("(").splice(-1, 1)[0].split("_")[1];
-              if (!courseCRN.includes("undefined")) {
-                courses.push(false);
-                return course;
-              }
+          console.log(coursesData);
+
+          setCourses(coursesData);
+          setCourseVisibility(courses);
+
+          let modulesPromise = [];
+          let assignmentsPromise = [];
+
+          for (const course of coursesData) {
+            modulesPromise.push(
+              fetch(
+                `http://54.153.125.141/api/courses/${course.id}/modules/${key}`
+              ).then((response) => response.json())
+            );
+
+            assignmentsPromise.push(
+              fetch(
+                `http://54.153.125.141/api/courses/${course.id}/assignments/${key}`
+              ).then((response) => response.json())
+            );
+          }
+
+          Promise.all(modulesPromise)
+            .then((modulesData) => {
+              setCourseModules(modulesData);
+
+              let visibility = [];
+              let moduleItemsPromise = [];
+              // iterate over modules data to fetch items for each module
+              // for each array of modules
+              modulesData.forEach((modules, courseIndex) => {
+                // if that array is indeed an array
+                if (Array.isArray(modules)) {
+                  let moduleVisibility = [];
+
+                  // for each module, get its items
+                  let itemsPromises = modules.map((module) => {
+                    const regex = /courses\/(\d+)\/modules\/(\d+)\/items/;
+                    const [call, courseId, moduleId] =
+                      module.items_url.match(regex);
+                    return fetch(
+                      `http://54.153.125.141/api/courses/${courseId}/modules/${moduleId}/items/${key}`
+                    ).then((response) => response.json());
+                  });
+
+                  for (let i = 0; i < itemsPromises.length; i++) {
+                    moduleVisibility.push(false);
+                  }
+
+                  visibility.push(moduleVisibility);
+                  moduleItemsPromise.push(Promise.all(itemsPromises));
+                } else {
+                  visibility.push(false);
+                  moduleItemsPromise.push(false);
+                }
+              });
+
+              // after all items are fetched, update the state with the collected data
+              Promise.all(moduleItemsPromise)
+                .then((moduleItems) => {
+                  setItems(moduleItems);
+                  setItemVisibility(visibility);
+                })
+                .catch((error) => {
+                  console.log("Error fetching module items:", error);
+                });
+            })
+            .catch((error) => {
+              console.log("Error fetching course modules:", error);
             });
 
-            setCourses(coursesData);
-            setCourseVisibility(courses);
+          Promise.all(assignmentsPromise)
+            .then((assignmentsData) => {
+              setAssignments(assignmentsData);
 
-            let modulesPromise = [];
-            let assignmentsPromise = [];
+              // if unsortedToDo is already defined, do not wait for loaded submissions to call function
+              // if (unsortedToDo.length > 0)
+              // populateSortedToDo(assignmentsData, []);
 
-            for (const course of coursesData) {
-              modulesPromise.push(
-                fetch(
-                  `http://54.153.125.141/api/courses/${course.id}/modules/${key}`
-                ).then((response) => response.json())
-              );
+              let submissionsPromise = [];
 
-              assignmentsPromise.push(
-                fetch(
-                  `http://54.153.125.141/api/courses/${course.id}/assignments/${key}`
-                ).then((response) => response.json())
-              );
-            }
+              // for each assignment
+              assignmentsData.forEach((course) => {
+                if (Array.isArray(course)) {
+                  let submissions = [];
 
-            Promise.all(modulesPromise)
-              .then((modulesData) => {
-                setCourseModules(modulesData);
+                  course.forEach((assignment) => {
+                    const regex = /courses\/(\d+)\/assignments\/(\d+)/;
+                    const [call, courseId, assignmentId] =
+                      assignment.html_url.match(regex);
 
-                let visibility = [];
-                let moduleItemsPromise = [];
-                // iterate over modules data to fetch items for each module
-                // for each array of modules
-                modulesData.forEach((modules, courseIndex) => {
-                  // if that array is indeed an array
-                  if (Array.isArray(modules)) {
-                    let moduleVisibility = [];
-
-                    // for each module, get its items
-                    let itemsPromises = modules.map((module) => {
-                      const regex = /courses\/(\d+)\/modules\/(\d+)\/items/;
-                      const [call, courseId, moduleId] =
-                        module.items_url.match(regex);
-                      return fetch(
-                        `http://54.153.125.141/api/courses/${courseId}/modules/${moduleId}/items/${key}`
-                      ).then((response) => response.json());
-                    });
-
-                    for (let i = 0; i < itemsPromises.length; i++) {
-                      moduleVisibility.push(false);
-                    }
-
-                    visibility.push(moduleVisibility);
-                    moduleItemsPromise.push(Promise.all(itemsPromises));
-                  } else {
-                    visibility.push(false);
-                    moduleItemsPromise.push(false);
-                  }
-                });
-
-                // after all items are fetched, update the state with the collected data
-                Promise.all(moduleItemsPromise)
-                  .then((moduleItems) => {
-                    setItems(moduleItems);
-                    setItemVisibility(visibility);
-                  })
-                  .catch((error) => {
-                    console.log("Error fetching module items:", error);
+                    submissions.push(
+                      fetch(
+                        `http://54.153.125.141/api/courses/${courseId}/assignments/${assignmentId}/submissions/self/${key}`
+                      ).then((response) => response.json())
+                    );
                   });
-              })
-              .catch((error) => {
-                console.log("Error fetching course modules:", error);
+
+                  submissionsPromise.push(Promise.all(submissions));
+                } else {
+                  submissionsPromise.push(false);
+                }
               });
 
-            Promise.all(assignmentsPromise)
-              .then((assignmentsData) => {
-                setAssignments(assignmentsData);
-
-                // if unsortedToDo is already defined, do not wait for loaded submissions to call function
-                // if (unsortedToDo.length > 0)
-                // populateSortedToDo(assignmentsData, []);
-
-                let submissionsPromise = [];
-
-                // for each assignment
-                assignmentsData.forEach((course) => {
-                  if (Array.isArray(course)) {
-                    let submissions = [];
-
-                    course.forEach((assignment) => {
-                      const regex = /courses\/(\d+)\/assignments\/(\d+)/;
-                      const [call, courseId, assignmentId] =
-                        assignment.html_url.match(regex);
-
-                      submissions.push(
-                        fetch(
-                          `http://54.153.125.141/api/courses/${courseId}/assignments/${assignmentId}/submissions/self/${key}`
-                        ).then((response) => response.json())
-                      );
-                    });
-
-                    submissionsPromise.push(Promise.all(submissions));
-                  } else {
-                    submissionsPromise.push(false);
-                  }
+              Promise.all(submissionsPromise)
+                .then((submissionsData) => {
+                  setSubmissions(submissionsData);
+                  populateSortedToDo(assignmentsData, submissionsData);
+                })
+                .catch((error) => {
+                  console.log("Error fetching submissions:", error);
                 });
-
-                Promise.all(submissionsPromise)
-                  .then((submissionsData) => {
-                    setSubmissions(submissionsData);
-                    populateSortedToDo(assignmentsData, submissionsData);
-                  })
-                  .catch((error) => {
-                    console.log("Error fetching submissions:", error);
-                  });
-              })
-              .catch((error) => {
-                console.log("Error fetching assignments:", error);
-              });
-          });
-      } catch (error) {
-        console.log(error);
-      }
+            })
+            .catch((error) => {
+              console.log("Error fetching assignments:", error);
+            });
+        });
+    } catch (error) {
+      console.log(error);
+    }
   }, [validKey]);
 
   function getCourseGrade(courseId) {
@@ -230,28 +231,24 @@ function Data() {
     for (let i = 0; i < assignmentsData.length; i++) {
       if (Array.isArray(assignmentsData[i])) {
         for (let j = 0; j < assignmentsData[i].length; j++) {
-          // if assignment is already defined -> copy from current assignments
-          if (unsortedToDo[newArr.length]) {
-            newArr.push(unsortedToDo[newArr.length]);
-          }
-          // if not defined -> default 0 for deleted
+          // default 0 for deleted
           // index, assignObj, courseIndex, assignIndex, deletedBool, unsorted/added, progress bar, submissionObj
-          else {
-            newArr.push([
-              newArr.length,
-              assignmentsData[i][j],
-              i,
-              j,
-              0,
-              1,
-              0,
-              submissionsData[i][j],
-            ]);
-          }
+          newArr.push([
+            newArr.length,
+            assignmentsData[i][j],
+            i,
+            j,
+            0,
+            1,
+            0,
+            submissionsData[i][j],
+          ]);
         }
       }
     }
+
     setUnsortedToDo(newArr);
+
     localStorage.setItem("unsortedToDo", JSON.stringify(newArr));
 
     setSortedToDo(() => {
@@ -309,7 +306,11 @@ function Data() {
     const oneDay = 24 * 60 * 60 * 1000;
     const parts = dueDate.split("/");
     const formattedDate = new Date(parts[2], parts[1] - 1, parts[0]);
+
+    // normalize dates to midnight to avoid issues with time of day
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    formattedDate.setHours(0, 0, 0, 0);
 
     const diffDays = Math.round((formattedDate - today) / oneDay);
 
@@ -609,14 +610,8 @@ function Data() {
 
         const validWorkflows = ["graded", "submitted"];
 
-        // cases for if graded
-        let submitted = false;
-        if (submission.grade === "userAdded" || !submission.grade)
-          submitted = true;
-
         // while assignment is not submitted, not graded, visible, course hasn't been removed, and toDo extent met
         return !validWorkflows.includes(submission.workflow_state) &&
-          submitted &&
           visible == 0 &&
           (courseIndex === "userAdded" ||
             !removedCourseNames.includes(courses[courseIndex].name)) &&
@@ -1030,12 +1025,12 @@ function Data() {
           <div className="section">
             <div className="toDo-title">To-do</div>
             <div className="toDo-add">
-              <input
-                id="toDo-add-inputTask"
-                placeholder="Enter task"
-                autoComplete="off"
-              ></input>
               <div className="toDo-add-container">
+                <input
+                  id="toDo-add-inputTask"
+                  placeholder="Enter task"
+                  autoComplete="off"
+                ></input>
                 <input
                   id="toDo-add-inputDate"
                   type="date"
@@ -1044,26 +1039,16 @@ function Data() {
                     setSelectedDate(event.target.value);
                   }}
                 ></input>
-                <select
-                  className="toDo-select"
-                  value={toDoExtent}
-                  onChange={(event) => {
-                    setToDoExtent(event.target.value);
-                    localStorage.setItem("toDoExtent", event.target.value);
-                  }}
-                >
-                  <option value="7">1 Week</option>
-                  <option value="14">2 Weeks</option>
-                  <option value="30">1 Month</option>
-                  <option value="1000">Show All</option>
-                </select>
                 <button
                   className="toDo-add-btn"
                   onClick={() => {
+                    const inputElement =
+                      document.getElementById("toDo-add-inputTask");
+                    const content = inputElement.value;
+
                     setAddedToDo((prevArr) => {
                       const arr = [...prevArr];
-                      const content =
-                        document.getElementById("toDo-add-inputTask").value;
+
                       const object = { name: content, due_at: selectedDate };
                       arr.push([
                         arr.length,
@@ -1092,11 +1077,27 @@ function Data() {
 
                       return arr;
                     });
+
+                    // clear the input field after updating the state
+                    inputElement.value = "";
                   }}
                 >
                   +
                 </button>
               </div>
+              <select
+                className="toDo-select"
+                value={toDoExtent}
+                onChange={(event) => {
+                  setToDoExtent(event.target.value);
+                  localStorage.setItem("toDoExtent", event.target.value);
+                }}
+              >
+                <option value="7">1 Week</option>
+                <option value="14">2 Weeks</option>
+                <option value="30">1 Month</option>
+                <option value="1000">Show All</option>
+              </select>
             </div>
             {sortedToDo.length > 0 ? (
               <div className="toDo-header">Current</div>
