@@ -1,5 +1,5 @@
 {
-  "name": "canvas-desktop2",
+  "name": "CanvasToDo",
   "version": "0.1.0",
   "main": "public/electron.js",
   "homepage": "./",
@@ -15,7 +15,7 @@
     "react-scripts": "5.0.1"
   },
   "scripts": {
-    "deploy": "electron-packager . canvas-app",
+    "deploy": "electron-packager . 'CanvasToDo' --icon=public/icon.icns",
     "start": "electron .",
     "build": "craco build",
     "test": "react-scripts start",

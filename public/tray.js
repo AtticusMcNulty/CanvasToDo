@@ -1,4 +1,4 @@
-const { Tray, Menu } = require('electron');
+const { Tray, Menu, nativeImage } = require('electron');
 const path = require('path');
 
 class TrayGenerator {
@@ -45,12 +45,15 @@ class TrayGenerator {
   }
 
   createTray = () => {
-    this.tray = new Tray(path.join(__dirname, './icon.png'));
+    let icon = nativeImage.createFromPath(path.join(__dirname, './icon.icns'));
+    icon = icon.resize({ width: 22, height: 22 });
+
+    this.tray = new Tray(icon);
     this.tray.setIgnoreDoubleClickEvents(true);
 
     this.tray.on('click', this.toggleWindow);
     this.tray.on('right-click', this.rightClickMenu);
-  };
+  }
 }
 
 module.exports = TrayGenerator;
