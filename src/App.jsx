@@ -54,14 +54,14 @@ function Data() {
     if (validKey)
       try {
         // get user information (name, id, etc.)
-        fetch(`http://54.153.125.141/api/users/self/${key}`)
+        fetch(`https://canvastodobackend.onrender.com/api/users/self/${key}`)
           .then((response) => response.json())
           .then((userData) => {
             setUser(userData);
 
             // get total course grades
             fetch(
-              `http://54.153.125.141/api/users/${userData.id}/enrollments/${key}`
+              `https://canvastodobackend.onrender.com/api/users/${userData.id}/enrollments/${key}`
             )
               .then((response) => response.json())
               .then((enrollmentData) => {
@@ -70,7 +70,7 @@ function Data() {
           });
 
         // get user courses
-        fetch(`http://54.153.125.141/api/courses/${key}`)
+        fetch(`https://canvastodobackend.onrender.com/api/courses/${key}`)
           .then((response) => response.json())
           .then((coursesData) => {
             // filter out invalid courses
@@ -95,13 +95,13 @@ function Data() {
             for (const course of coursesData) {
               modulesPromise.push(
                 fetch(
-                  `http://54.153.125.141/api/courses/${course.id}/modules/${key}`
+                  `https://canvastodobackend.onrender.com/api/courses/${course.id}/modules/${key}`
                 ).then((response) => response.json())
               );
 
               assignmentsPromise.push(
                 fetch(
-                  `http://54.153.125.141/api/courses/${course.id}/assignments/${key}`
+                  `https://canvastodobackend.onrender.com/api/courses/${course.id}/assignments/${key}`
                 ).then((response) => response.json())
               );
             }
@@ -125,7 +125,7 @@ function Data() {
                       const [call, courseId, moduleId] =
                         module.items_url.match(regex);
                       return fetch(
-                        `http://54.153.125.141/api/courses/${courseId}/modules/${moduleId}/items/${key}`
+                        `https://canvastodobackend.onrender.com/api/courses/${courseId}/modules/${moduleId}/items/${key}`
                       ).then((response) => response.json());
                     });
 
@@ -177,7 +177,7 @@ function Data() {
 
                       submissions.push(
                         fetch(
-                          `http://54.153.125.141/api/courses/${courseId}/assignments/${assignmentId}/submissions/self/${key}`
+                          `https://canvastodobackend.onrender.com/api/courses/${courseId}/assignments/${assignmentId}/submissions/self/${key}`
                         ).then((response) => response.json())
                       );
                     });
@@ -872,7 +872,7 @@ function Data() {
 
                 // check the length of input is greater than 0
                 const check = fetch(
-                  `http://54.153.125.141/api/users/self/${key}`
+                  `https://canvastodobackend.onrender.com/api/users/self/${key}`
                 ).then((response) => response.json());
 
                 check
