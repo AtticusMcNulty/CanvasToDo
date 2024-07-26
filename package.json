@@ -15,6 +15,7 @@
     "react-scripts": "5.0.1"
   },
   "scripts": {
+    "publish": "gh-pages -d build",
     "deploy": "electron-packager . 'CanvasToDo' --icon=public/icon.icns",
     "start": "electron .",
     "build": "craco build",
@@ -42,6 +43,7 @@
   "devDependencies": {
     "electron": "^30.0.1",
     "electron-packager": "^17.1.2",
+    "gh-pages": "^6.1.1",
     "webpack-node-externals": "^3.0.0"
   }
 }
