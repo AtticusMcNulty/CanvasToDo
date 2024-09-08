@@ -7,12 +7,12 @@ I was already familiar with React and had worked with APIs in previous projects,
 
 ## Project Description
 CanvasToDo requires users to generate an API key through their Canvas account to log in. Once the key is validated, a backend JavaScript file uses it to make API calls, sending the data to the React frontend.</br>
+
 Key features include:</br>
 - Header: Displays user’s name, ID, and profile picture.
 - Courses: Shows current courses with the ability to add or remove them dynamically.
 - To-Do List: Lists upcoming assignments, allows users to check off completed ones (with the option to move them back), add custom assignments, and set completion percentages.
-- Modules: Displays course modules with a dropdown for each item, labeling assignments that need submission, are awaiting grading, and their respective grades.
-</br>
+- Modules: Displays course modules with a dropdown for each item, labeling assignments that need submission, are awaiting grading, and their respective grades.</br>
 
 ## Walkthrough
 
