@@ -14,7 +14,7 @@ Key features include:</br>
 - To-Do List: Lists upcoming assignments, allows users to check off completed ones (with the option to move them back), add custom assignments, and set completion percentages.
 - Modules: Displays course modules with a dropdown for each item, labeling assignments that need submission, are awaiting grading, and their respective grades.</br>
 
-## Walkthrough
+## Visual Walkthrough
 
 ## Resources
 Canvas API Documentation: [https://canvas.instructure.com/doc/api/](https://canvas.instructure.com/doc/api/)</br>
