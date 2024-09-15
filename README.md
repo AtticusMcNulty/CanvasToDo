@@ -17,7 +17,7 @@ Key features include:</br>
 ## Visual Walkthrough
 When I open the program, it loads as a menubar application on the top of my computer screen.</br>
 <img width="1512" alt="Screenshot 2024-09-07 at 10 25 13 PM" src="https://github.com/user-attachments/assets/cfaa5a5b-01a5-4cf3-afd3-ee94b1382e05">
-Then when I click on the icon it opens the CanvasToDo interface.</br>
+Clicking on the icon, opens the CanvasToDo interface.</br>
 When you open the applucation for the first time, you must enter your api token. If confused, users can click on the "Request an API token" which opens an step-by-step article on how to create one. Incorrect api keys will result in an invalid notification and users will be prompted to reenter.</br>
 <img width="1512" alt="Screenshot 2024-09-15 at 1 11 26 PM" src="https://github.com/user-attachments/assets/8b93e84c-373c-4044-b26d-83e92878b22e">
 After verifying the API token, the application will load. Displayed at the top is the users full name, canvas id, and profile picture (clicking this gives users the ability to logout).</br>
