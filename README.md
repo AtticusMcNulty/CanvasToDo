@@ -1,4 +1,4 @@
-<img width="1512" alt="Screenshot 2024-09-15 at 1 26 07 PM" src="https://github.com/user-attachments/assets/cc053664-271b-43e4-a31c-c64ca099cc6f"># CanvasToDo
+# CanvasToDo
 ## How I got the Idea
 I developed this project during my sophomore year. I was inspired by "TickTick," a task management app I used for classes. Unlike other to-do apps I had tried (Notion, Todoist, etc.), TickTick stuck with me because of its simplicity and easy access from the Macbook menubar. While using it, I had to manually enter my assignments and dates, which led me to try automating this process. After discovering the Canvas API, which my school uses, I decided to build an app to interact with it.
 
