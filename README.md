@@ -15,6 +15,12 @@ Key features include:</br>
 - Modules: Displays course modules with a dropdown for each item, labeling assignments that need submission, are awaiting grading, and their respective grades.</br>
 
 ## Visual Walkthrough
+When I open the program, it loads as a menubar application on the top of my computer screen.</br>
+<img width="1512" alt="Screenshot 2024-09-07 at 10 25 13 PM" src="https://github.com/user-attachments/assets/cfaa5a5b-01a5-4cf3-afd3-ee94b1382e05">
+Then when I click on the icon it opens the CanvasToDo interface.</br>
+<img width="1512" alt="Screenshot 2024-09-07 at 10 28 39 PM" src="https://github.com/user-attachments/assets/73f5d28a-6bd1-4a36-9b20-e1986433b941">
+
+
 
 ## Resources
 Canvas API Documentation: [https://canvas.instructure.com/doc/api/](https://canvas.instructure.com/doc/api/)</br>
