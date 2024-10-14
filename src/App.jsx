@@ -36,6 +36,10 @@ function Data() {
     const prevExtent = localStorage.getItem("toDoExtent");
     return prevExtent !== null ? prevExtent : "7";
   });
+  const [toDoLength, setToDoLength] = React.useState(() => {
+    const prevExtent = localStorage.getItem("toDoLength");
+    return prevExtent !== null ? prevExtent : 20;
+  });
 
   const [key, setKey] = React.useState(() => {
     // either null or string representation of key
@@ -47,10 +51,17 @@ function Data() {
     if (validKey == null) return false;
     return validKey;
   });
+  const [reset, setReset] = React.useState(false);
 
   const [showCourseName, setShowCourseName] = React.useState(true);
 
   React.useEffect(() => {
+    if (reset) {
+      // reset valid key to original value
+      setValidKey(!validKey);
+      setReset(false);
+    }
+
     if (validKey)
       try {
         // get user information (name, id, etc.)
@@ -304,25 +315,32 @@ function Data() {
     if (!dueDate) return null;
 
     const oneDay = 24 * 60 * 60 * 1000;
+
+    // get and convert assignment due date
     const parts = dueDate.split("/");
     const formattedDate = new Date(parts[2], parts[1] - 1, parts[0]);
+    const formattedDateConv = new Date(
+      formattedDate.getTime() - formattedDate.getTimezoneOffset() * 60 * 1000
+    );
 
-    // normalize dates to midnight to avoid issues with time of day
+    // get current time at users location
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    formattedDate.setHours(0, 0, 0, 0);
+    const todayConv = new Date(
+      today.getTime() - today.getTimezoneOffset() * 60 * 1000
+    );
 
-    const diffDays = Math.round((formattedDate - today) / oneDay);
+    // calculate number of days difference between assignment and users time
+    const diffDays = Math.round((formattedDateConv - todayConv) / oneDay);
 
     if (diffDays == 0) {
       return ["Today", diffDays];
     } else if (diffDays == 1) {
       return ["Tomorrow", diffDays];
     } else {
-      const month = formattedDate.toLocaleDateString(undefined, {
+      const month = formattedDateConv.toLocaleDateString(undefined, {
         month: "short",
       });
-      const day = formattedDate.getDate();
+      const day = formattedDateConv.getDate();
       return [`${month} ${day}`, diffDays];
     }
   }
@@ -514,7 +532,7 @@ function Data() {
                                   </div>
                                   <div
                                     className="module-item-attributes"
-                                    style={{ width: "75px" }}
+                                    style={{ width: "95px" }}
                                   >
                                     <div
                                       style={{
@@ -552,6 +570,8 @@ function Data() {
                                           ? dueDate
                                             ? `${dueDate}`
                                             : "🟨"
+                                          : dueDate
+                                          ? `${dueDate}`
                                           : ""
                                         : ""}
                                     </div>
@@ -603,7 +623,7 @@ function Data() {
           : [null, null];
 
         const name = assignment
-          ? truncateString(assignment.name, 20)
+          ? truncateString(assignment.name, toDoLength)
           : assignment.name;
 
         const removedCourseNames = removedCourses.map((item) => item[0]);
@@ -934,6 +954,15 @@ function Data() {
             <div className="user-info">
               <div>{user.name}</div>
               <div>ID: {user.id}</div>
+              <button
+                onClick={() => {
+                  // change dependecy array to refresh api calls
+                  setValidKey(!validKey);
+                  setReset(true);
+                }}
+              >
+                🔄
+              </button>
             </div>
             <div className="dropdown-container">
               <img
@@ -1085,19 +1114,32 @@ function Data() {
                   +
                 </button>
               </div>
-              <select
-                className="toDo-select"
-                value={toDoExtent}
-                onChange={(event) => {
-                  setToDoExtent(event.target.value);
-                  localStorage.setItem("toDoExtent", event.target.value);
-                }}
-              >
-                <option value="7">1 Week</option>
-                <option value="14">2 Weeks</option>
-                <option value="30">1 Month</option>
-                <option value="1000">Show All</option>
-              </select>
+              <div className="toDo-settings-container">
+                <select
+                  className="toDo-select"
+                  value={toDoExtent}
+                  onChange={(event) => {
+                    setToDoExtent(event.target.value);
+                    localStorage.setItem("toDoExtent", event.target.value);
+                  }}
+                >
+                  <option value="7">1 Week</option>
+                  <option value="14">2 Weeks</option>
+                  <option value="30">1 Month</option>
+                  <option value="1000">Show All</option>
+                </select>
+                <div>{`Title Length: ${toDoLength}`}</div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={toDoLength}
+                  onChange={(event) => {
+                    setToDoLength(event.target.value);
+                    localStorage.setItem("toDoLength", event.target.value);
+                  }}
+                />
+              </div>
             </div>
             {sortedToDo.length > 0 ? (
               <div className="toDo-header">Current</div>
