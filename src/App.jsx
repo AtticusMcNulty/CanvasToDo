@@ -356,6 +356,28 @@ function Data() {
     return str.substring(0, lastSpaceIndex);
   }
 
+  function getWorkflowClassification(submissionValid, dueDate, workflowState) {
+    let result = "";
+
+    if (submissionValid) {
+      if (workflowState === "graded") {
+        result = "🟩";
+      } else if (workflowState === "submitted") {
+        result = "🟨";
+      } else {
+        if (dueDate) {
+          result = `${dueDate}`;
+        } else {
+          result = "";
+        }
+      }
+    } else {
+      result = "";
+    }
+
+    return result;
+  }
+
   const addableCourses = removedCourses.map((course, index) => {
     return (
       <div key={index} className="courseModal-item">
@@ -559,21 +581,15 @@ function Data() {
                                         daysUntil <= 0 ? "past-due" : ""
                                       } ${daysUntil > 0 ? "due" : ""}`}
                                     >
-                                      {submissionValid
-                                        ? submissions[courseIndex][
-                                            assignObj.index
-                                          ].workflow_state === "graded"
-                                          ? "🟩"
-                                          : submissions[courseIndex][
+                                      {getWorkflowClassification(
+                                        submissionValid,
+                                        dueDate,
+                                        submissionValid
+                                          ? submissions[courseIndex][
                                               assignObj.index
-                                            ].workflow_state === "submitted"
-                                          ? dueDate
-                                            ? `${dueDate}`
-                                            : "🟨"
-                                          : dueDate
-                                          ? `${dueDate}`
-                                          : ""
-                                        : ""}
+                                            ].workflow_state
+                                          : null
+                                      )}
                                     </div>
                                   </div>
                                 </div>
