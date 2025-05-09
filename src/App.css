@@ -377,7 +377,7 @@ body {
 }
 
 .course-title {
-  width: 100px;
+  width: 80px;
 }
 
 .course-arrow {
@@ -421,7 +421,9 @@ body {
 
 .module-item-attributes {
   display: flex;
-  gap: 5px;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 23px;
 }
 
 .due {
